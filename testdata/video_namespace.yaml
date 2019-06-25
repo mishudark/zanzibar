@@ -1,0 +1,25 @@
+name: video
+relations:
+- name: owner
+- name: commenter
+  userset_rewrite:
+    union:
+    - computed_userset:
+        relation: viewer
+- name: viewer
+  userset_rewrite:
+    union:
+    - computed_userset:
+        relation: owner
+    - computed_userset:
+        relation: editor
+    - tuple_to_userset:
+        tupleset:
+          relation: parent
+        computed_userset:
+          relation: editor
+    - tuple_to_userset:
+        tupleset:
+          relation: parent
+        computed_userset:
+          relation: viewer
