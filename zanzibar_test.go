@@ -51,6 +51,10 @@ type store struct {
 	records map[string][]string
 }
 
+func (s *store) Save(tuple RelationTuple) error {
+	return nil
+}
+
 func (s *store) Exact(userID string, object Object, relation string) error {
 	errNotFound := errors.New("not found")
 

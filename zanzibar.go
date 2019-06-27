@@ -33,6 +33,7 @@ const RelationParent = "parent"
 type TupleStore interface {
 	Exact(userID string, object Object, relation string) error
 	Usersets(object Object, relation string) ([]Userset, error)
+	Save(tuple RelationTuple) error
 }
 
 type UsersetRewrite struct {
