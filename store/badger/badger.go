@@ -26,6 +26,7 @@ func (t *tupleStore) Exact(userID string, object zanzibar.Object, relation strin
 }
 
 func (t *tupleStore) Usersets(object zanzibar.Object, relation string) ([]zanzibar.Userset, error) {
+	var res []zanzibar.Userset
 	err := t.db.View(func(txn *badger.Txn) error {
 		opts := badger.DefaultIteratorOptions
 		opts.PrefetchValues = false
@@ -36,7 +37,6 @@ func (t *tupleStore) Usersets(object zanzibar.Object, relation string) ([]zanzib
 		prefixStr := fmt.Sprintf(objRelationTpl+"@", object.Namespace, object.ID, relation)
 		prefix := []byte(prefixStr)
 
-		var res []zanzibar.Userset
 		for it.Seek(prefix); it.ValidForPrefix(prefix); it.Next() {
 			item := it.Item()
 			k := string(item.Key())
@@ -61,7 +61,7 @@ func (t *tupleStore) Usersets(object zanzibar.Object, relation string) ([]zanzib
 		return nil
 	})
 
-	return nil, err
+	return res, err
 }
 
 func (t *tupleStore) Save(tuple zanzibar.RelationTuple) error {

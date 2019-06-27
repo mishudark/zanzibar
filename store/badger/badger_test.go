@@ -9,12 +9,15 @@ import (
 )
 
 func TestExact(t *testing.T) {
+	t.Parallel()
+
 	path, err := ioutil.TempDir("", "")
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	db := OpenDB(path)
+	defer db.Close()
 	store := NewTupleStore(db)
 
 	err = db.Update(func(txn *badger.Txn) error {
@@ -61,19 +64,21 @@ func TestExact(t *testing.T) {
 			actual := (err != nil) != tt.hasErr
 			if actual {
 				t.Errorf("expected %t, actual %t", tt.hasErr, actual)
-				return
 			}
 		})
 	}
 }
 
 func TestSave(t *testing.T) {
+	t.Parallel()
+
 	path, err := ioutil.TempDir("", "")
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	db := OpenDB(path)
+	defer db.Close()
 	store := NewTupleStore(db)
 
 	var tests = []struct {
@@ -140,6 +145,87 @@ func TestSave(t *testing.T) {
 
 			if err != nil {
 				t.Error(err)
+			}
+		})
+	}
+}
+
+func TestUsersets(t *testing.T) {
+	t.Parallel()
+
+	path, err := ioutil.TempDir("", "")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	db := OpenDB(path)
+	defer db.Close()
+	store := NewTupleStore(db)
+
+	relations := []string{
+		"doc:readme#viewer@1",
+		"doc:readme#viewer@group:eng#member",
+		"doc:readme#editor@group:eng#member",
+		"doc:readme#editor@group:sales#member",
+	}
+
+	for _, rel := range relations {
+		err = db.Update(func(txn *badger.Txn) error {
+			return txn.Set([]byte(rel), []byte{0})
+		})
+
+		if err != nil {
+			t.Fatal(err)
+			return
+		}
+	}
+
+	var tests = []struct {
+		name     string
+		object   zanzibar.Object
+		relation string
+		length   int
+	}{
+		{
+			name: "one userset",
+			object: zanzibar.Object{
+				Namespace: "doc",
+				ID:        "readme",
+			},
+			relation: "viewer",
+			length:   1,
+		},
+		{
+			name: "two usersets",
+			object: zanzibar.Object{
+				Namespace: "doc",
+				ID:        "readme",
+			},
+			relation: "editor",
+			length:   2,
+		},
+		{
+			name: "no matches",
+			object: zanzibar.Object{
+				Namespace: "doc",
+				ID:        "readme",
+			},
+			relation: "alien",
+			length:   0,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			items, err := store.Usersets(tt.object, tt.relation)
+			if err != nil {
+				t.Error(err)
+				return
+			}
+
+			actual := len(items)
+			if actual != tt.length {
+				t.Errorf("expected length %d, actual %d", tt.length, actual)
 			}
 		})
 	}
