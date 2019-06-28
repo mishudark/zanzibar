@@ -171,13 +171,13 @@ func (a *Authorization) Check(userID string, object Object, relation string) boo
 
 // NewAuthorizationService returns an Authorization service using the given store, and reads from
 // the given directory yaml files containing namespace configs
-func NewAuthorizationService(store TupleStore, rewriteRulesPath string) Authorization {
+func NewAuthorizationService(store TupleStore, rewriteRulesPath string) *Authorization {
 	rules, err := LoadRewriteRules(rewriteRulesPath)
 	if err != nil {
 		panic(err)
 	}
 
-	return Authorization{
+	return &Authorization{
 		store:         store,
 		computedRules: rules,
 	}

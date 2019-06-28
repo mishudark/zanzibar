@@ -14,6 +14,10 @@ const configExt = "yaml"
 // LoadRewriteRules gets rules from all yaml files inside the given directory
 func LoadRewriteRules(root string) (map[string]UsersetRewrite, error) {
 	res := make(map[string]UsersetRewrite)
+	if root == "" {
+		return res, nil
+	}
+
 	err := filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
 		if info.IsDir() {
 			return nil
