@@ -109,7 +109,7 @@ func TestSave(t *testing.T) {
 		},
 		{
 			name:  "tuple with userset",
-			using: "doc:readme#viewer@group:eng#member",
+			using: "doc:readme#viewer@|group:eng#member",
 			given: zanzibar.RelationTuple{
 				Object: zanzibar.Object{
 					Namespace: "doc",
@@ -164,9 +164,9 @@ func TestUsersets(t *testing.T) {
 
 	relations := []string{
 		"doc:readme#viewer@1",
-		"doc:readme#viewer@group:eng#member",
-		"doc:readme#editor@group:eng#member",
-		"doc:readme#editor@group:sales#member",
+		"doc:readme#viewer@|group:eng#member",
+		"doc:readme#editor@|group:eng#member",
+		"doc:readme#editor@|group:sales#member",
 	}
 
 	for _, rel := range relations {

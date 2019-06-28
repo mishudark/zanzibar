@@ -9,7 +9,16 @@ import (
 	"github.com/mishudark/zanzibar"
 )
 
-const objRelationTpl = "%s:%s#%s"
+const (
+	objRelationTpl = "%s:%s#%s"
+	// userSetMark is added to user part to detect when it is not an user_id, it is useful to retrieve
+	// just usersets when they are needed intad the whole usersets + user_ids
+	// user_id is represented in the tuple as
+	//		doc:readme#viewer@2
+	// userset is represented in the tuple as
+	//		doc:readme#viewer@|group:eng#member
+	userSetMark = "|"
+)
 
 type tupleStore struct {
 	db *badger.DB
@@ -34,14 +43,13 @@ func (t *tupleStore) Usersets(object zanzibar.Object, relation string) ([]zanzib
 		it := txn.NewIterator(opts)
 		defer it.Close()
 
-		prefixStr := fmt.Sprintf(objRelationTpl+"@", object.Namespace, object.ID, relation)
+		prefixStr := fmt.Sprintf(objRelationTpl+"@"+userSetMark, object.Namespace, object.ID, relation)
 		prefix := []byte(prefixStr)
 
 		for it.Seek(prefix); it.ValidForPrefix(prefix); it.Next() {
 			item := it.Item()
 			k := string(item.Key())
-
-			rec := k[strings.LastIndex(k, "@")+1:]
+			rec := k[strings.LastIndex(k, "@"+userSetMark)+2:] // it is +2 due to the lenght of the separator @|
 
 			parts := strings.Split(rec, "#")
 			if len(parts) != 2 {
@@ -69,8 +77,8 @@ func (t *tupleStore) Save(tuple zanzibar.RelationTuple) error {
 
 	if tuple.User.UserID == "" {
 		userset := tuple.User.Userset
-		userStr := fmt.Sprintf(objRelationTpl, userset.Object.Namespace, userset.Object.ID, userset.Relation)
-		str += "@" + userStr
+		usersetStr := fmt.Sprintf(objRelationTpl, userset.Object.Namespace, userset.Object.ID, userset.Relation)
+		str += "@" + userSetMark + usersetStr
 	} else {
 		str += "@" + tuple.User.UserID
 	}
