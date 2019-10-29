@@ -4,7 +4,7 @@ import (
 	"io/ioutil"
 	"testing"
 
-	"github.com/dgraph-io/badger"
+	badger "github.com/dgraph-io/badger/v2"
 	"github.com/mishudark/zanzibar"
 )
 

@@ -138,7 +138,7 @@ func (a *Authorization) tupleUserset(object Object, relation string) []Userset {
 // 1) check for directly match: object#relation@user_id
 // 2) get all the userSets for the given object#relation
 // 2.1) call CHECK api again using the previous userSets and the initial user_id
-// 3) get userSet that match: object#parent
+// 3) apply transformations based on namespace config
 // 3.1) get all the userSets that match: userSetObject#relation
 // 3.2) call CHECK api again using the previous userSets and the initial user_id
 

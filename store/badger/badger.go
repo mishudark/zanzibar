@@ -5,7 +5,7 @@ import (
 	"log"
 	"strings"
 
-	"github.com/dgraph-io/badger"
+	badger "github.com/dgraph-io/badger/v2"
 	"github.com/mishudark/zanzibar"
 )
 
@@ -91,9 +91,7 @@ func (t *tupleStore) Save(tuple zanzibar.RelationTuple) error {
 
 // OpenDB using the given path
 func OpenDB(path string) *badger.DB {
-	opts := badger.DefaultOptions
-	opts.Dir = path
-	opts.ValueDir = path
+	opts := badger.DefaultOptions(path)
 	db, err := badger.Open(opts)
 	if err != nil {
 		log.Fatal(err)
