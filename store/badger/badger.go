@@ -5,7 +5,7 @@ import (
 	"log"
 	"strings"
 
-	badger "github.com/dgraph-io/badger/v2"
+	badger "github.com/dgraph-io/badger/v3"
 	"github.com/mishudark/zanzibar"
 )
 
@@ -84,7 +84,7 @@ func (t *tupleStore) Save(tuple zanzibar.RelationTuple) error {
 	}
 
 	err := t.db.Update(func(txn *badger.Txn) error {
-		return txn.Set([]byte(str), []byte{0})
+		return txn.Set([]byte(str), []byte{})
 	})
 	return err
 }
